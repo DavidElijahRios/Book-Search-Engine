@@ -1,15 +1,11 @@
 const { gql } = require('apollo-server-express');
-// ? do I need to put the match on the user models
-// ? and how do I bring in bookschema?
-// ? Why doesn't there need to be an _id for book type?
-// ?Does the password need to be there or bookCount?
-// ? Where is the Auth type coming from 
+
 const typeDefs = gql`
 type User {
     _id: ID!
     username: String!
     email: String!
-    password: String!
+    bookCount: INT
     savedBooks: [Book]
 }
 
@@ -23,16 +19,17 @@ type Book {
 }
 
 type Auth {
-    token
-    user
+    token: ID!
+    user: User
 }
 
 type Query {
-    me: [User]
+    me: User
 }
 
 type Mutation {
-    
+    addUser(username: String!, email: String!, password: String!): Auth
+    login(email: String!, password: String!): Auth
 }
 `;
 
