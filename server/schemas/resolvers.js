@@ -20,18 +20,43 @@ const resolvers = {
     Mutation: {
        login: async (parent, args, context) => {
             const user = await User.findOne(args.email)
-            // TODO: need to add correct password
-            // TODO: return token and user like add user
+            const correctPw = await user.isCorrectPassword(args.password)
+            
+            if (correctPw) {
+                const token = signToken(user)
+                return ({ token, user });
+            } else {
+                throw new AuthenticationError ("incorrect Password")
+            }
        },
        addUser: async (parent, args, context) => {
             const user = await User.create(args);
             const token = signToken(user);
             return ({ token, user });
        },
-       saveBook: async () => {
+       saveBook: async (parent, args, context) => {
+        const updatedUser = await User.findOneAndUpdate(
+            { _id: context.user._id },
+            {
+                $addToSet: { savedBooks: args.input }
+            },
+            {
+                new: true,
+            }
+        );
+        return updatedUser
        },
-       removeBook: async () => {
-
+       removeBook: async (parent, args, context) => {
+          const updatedUser = await User.findOneAndUpdate(
+            { _id: context.user._id },
+            {
+                $pull: { savedBooks: { bookId: args.bookId } }
+            },
+            {
+                new: true
+            }
+          );
+          return updatedUser
        },
     },
 };
